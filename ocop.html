@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="TOUR-HUB — Smart Tourism Platform Việt Nam. Story · Food · Service · Check-in · OCOP · AI Travel Planner · Guide Marketplace · VietQR." name="description"/>
+<meta content="#013230" name="theme-color"/>
+<meta content="du lịch Việt Nam, smart tourism, OCOP, AI Travel Planner, VietQR, Momo, ZaloPay, hướng dẫn viên" name="keywords"/>
+<meta content="TOUR-HUB" name="author"/>
+<meta content="website" property="og:type"/>
+<meta content="TOUR-HUB" property="og:site_name"/>
+<meta content="TOUR-HUB | Smart Tourism Platform Việt Nam" property="og:title"/>
+<meta content="6 trải nghiệm số trong 1 nền tảng — AI Planner, Guide Marketplace, OCOP E-commerce, Payment thực." property="og:description"/>
+<meta content="https://images.unsplash.com/photo-1528181304800-259b08848526?w=1200&amp;q=80" property="og:image"/>
+<meta content="vi_VN" property="og:locale"/>
+<meta content="summary_large_image" name="twitter:card"/>
+<title>OCOP Hub | TOUR-HUB</title>
+<link href='data:application/manifest+json;utf8,{"name":"TOUR-HUB","short_name":"TOURHUB","start_url":"/","display":"standalone","background_color":"#013230","theme_color":"#013230","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3097/3097144.png","sizes":"512x512","type":"image/png"}]}' rel="manifest"/>
+<link href="https://cdn-icons-png.flaticon.com/512/3097/3097144.png" rel="icon" type="image/png"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<script defer="" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer="" src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Playfair+Display:ital,wght@1,500;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="assets/app.css" rel="stylesheet"/><link href="assets/search-wide.css" rel="stylesheet"/><link rel="preconnect" href="https://unpkg.com" crossorigin/><link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin/><link rel="preconnect" href="https://images.unsplash.com" crossorigin/><link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin/>
+</head>
+<body>
+<!-- ============ NAV ============ -->
+<!-- ============ HOME ============ -->
+<!-- ============ QR SCAN ============ -->
+<!-- ============ FOOD ============ -->
+<!-- ============ SERVICE ============ -->
+<!-- ============ CHECK-IN ============ -->
+<!-- ============ OCOP ============ -->
+<!-- ============ GUIDE ============ -->
+<!-- ============ AI PLANNER ============ -->
+<!-- ============ PROFILE ============ -->
+<!-- ============ ADMIN ============ -->
+<!-- ============ CART PAGE ============ -->
+<!-- ============ AUTH MODAL ============ -->
+<!-- ============ CART MODAL ============ -->
+<!-- ============ PAYMENT MODAL ============ -->
+<!-- ============ DETAIL MODAL ============ -->
+<!-- ============ FOOTER ============ -->
+<!-- ============ TOAST ============ -->
+<!-- ============ MOBILE NAV ============ -->
+<!-- ============ PATCH v9.5: AUTH + CHECKOUT + LOGO ============ -->
+<!-- ============ PATCH v13: AUTH CLOSE + ACCOUNT MENU ============ -->
+<nav class="nav">
+<div class="nav-wrap">
+<div class="brand" onclick="go('home')">
+<div class="brand-logo"><i class="fas fa-map-marked-alt"></i></div>
+<span>TOUR-HUB <small style="font-size:.7rem;opacity:.6"></small></span>
+</div>
+<div class="nav-menu">
+<div class="nav-link" data-page="home" onclick="go('home')">Home</div>
+<div class="nav-link" data-page="story" onclick="go('story')">Story</div>
+<div class="nav-link" data-page="food" onclick="go('food')">Food</div>
+<div class="nav-link" data-page="service" onclick="go('service')">Service</div>
+<div class="nav-link" data-page="checkin" onclick="go('checkin')">Check-in</div>
+<div class="nav-link" data-page="crowd" onclick="location.href='crowd.html'"><i class="fas fa-leaf" style="font-size:.78rem;margin-right:3px"></i>Giờ vàng</div>
+<div class="nav-link" data-page="ocop" onclick="go('ocop')">OCOP</div>
+<div class="nav-link" data-page="guide" onclick="go('guide')">Guide</div>
+<div class="nav-link" data-page="planner" onclick="go('planner')" title="AI Travel Planner"><i class="fas fa-wand-magic-sparkles" style="font-size:.78rem;margin-right:3px"></i>Planner</div>
+</div>
+<div class="nav-right">
+<div class="search-mini">
+<i class="fas fa-search"></i>
+<input id="gSearch" onblur="setTimeout(()=&gt;document.getElementById('searchSuggest').classList.remove('show'),200)" onfocus="onSearchInput()" oninput="onSearchInput()" placeholder="Tìm Hội An, phở..." type="search"/>
+<div class="search-suggest" id="searchSuggest"></div>
+</div>
+<button class="icon-btn" onclick="go('qr')" title="Quét QR"><i class="fas fa-qrcode"></i></button>
+<button class="icon-btn" onclick="toggleTheme()" title="Đổi giao diện"><i class="fas fa-moon" id="themeIcon"></i></button>
+<button class="icon-btn" onclick="openCart()" style="position:relative" title="Giỏ hàng"><i class="fas fa-shopping-cart"></i><span class="badge-dot" id="cartBadge" style="display:none">0</span></button>
+<button class="btn btn-outline btn-sm" id="loginBtn" onclick="openLogin()"><i class="fas fa-user"></i> Đăng nhập</button>
+<button class="btn btn-primary btn-sm" id="registerBtn" onclick="openRegister()"><i class="fas fa-user-plus"></i> Đăng ký</button>
+<button class="icon-btn" id="userBtn" onclick="go('profile')" style="display:none" title="Hồ sơ"><i class="fas fa-user-circle"></i></button>
+</div>
+</div>
+</nav>
+<div class="page active" id="page-ocop">
+<div class="container-xxl section-sm">
+<div class="section-head"><div><h2><i class="fas fa-shopping-basket"></i> OCOP Hub</h2><p class="section-sub">Sàn TMĐT đặc sản OCOP — truy xuất nguồn gốc, livestream</p></div><button class="btn btn-warm btn-sm"><i class="fas fa-video"></i> Đang Livestream (3)</button></div>
+<div id="ocop-list">
+<div class="filters">
+<div class="field"><label>Tìm kiếm</label><input id="ocopSearch" oninput="renderOcop()" placeholder="Tên sản phẩm..."/></div>
+<div class="field"><label>Vùng miền</label><select id="ocopRegion" onchange="renderOcop()"><option value="">Tất cả</option><option>Bắc</option><option>Trung</option><option>Nam</option></select></div>
+<div class="field"><label>Hạng sao</label><select id="ocopStar" onchange="renderOcop()"><option value="">Tất cả</option><option value="5">5 sao</option><option value="4">4 sao</option><option value="3">3 sao</option></select></div>
+<div class="field"><label>Giá</label><select id="ocopPrice" onchange="renderOcop()"><option value="">Tất cả</option><option value="low">Dưới 100k</option><option value="mid">100k-500k</option><option value="high">Trên 500k</option></select></div>
+</div>
+<div class="card-grid" id="ocopGrid"></div>
+</div>
+<div id="ocop-detail" style="display:none"></div>
+</div>
+</div>
+<div class="page" id="page-profile">
+<div class="container-xxl section-sm">
+<div class="section-head"><div><h2><i class="fas fa-user"></i> Hồ sơ của tôi</h2></div><button class="btn btn-ghost btn-sm" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</button></div>
+<div id="profileBody"></div>
+</div>
+</div>
+<div class="page" id="page-admin">
+<div class="container-xxl section-sm">
+<div class="section-head"><div><h2><i class="fas fa-chart-line"></i> Admin Dashboard</h2><p class="section-sub">Tổng quan vận hành nền tảng</p></div></div>
+<div class="tabs" style="max-width:600px">
+<button class="tab active" data-atab="overview" onclick="switchAdm('overview')">Tổng quan</button>
+<button class="tab" data-atab="orders" onclick="switchAdm('orders')">Đơn hàng</button>
+<button class="tab" data-atab="local" onclick="switchAdm('local')">Địa phương</button>
+</div>
+<div id="adm-overview"></div>
+<div id="adm-orders" style="display:none"></div>
+<div id="adm-local" style="display:none"></div>
+</div>
+</div>
+<div class="page" id="page-cart">
+<div class="container-xxl section-sm">
+<div class="section-head"><div><h2><i class="fas fa-shopping-cart"></i> Giỏ hàng của bạn</h2><p class="section-sub">Quản lý sản phẩm &amp; dịch vụ đã chọn trước khi thanh toán</p></div><button class="btn btn-ghost btn-sm" onclick="history.length&gt;1?history.back():go('home')"><i class="fas fa-arrow-left"></i> Tiếp tục mua sắm</button></div>
+<div id="cartPageBody"></div>
+</div>
+</div>
+<div class="page" id="page-checkout"></div>
+<div class="page" id="page-thanks"></div>
+<div class="page" id="page-booking"></div>
+<div class="modal-back" id="authModal">
+<div class="modal">
+<button class="modal-close" onclick="closeModal('authModal')"><i class="fas fa-times"></i></button>
+<div class="tabs" style="max-width:280px;margin:0 auto 20px">
+<button class="tab active" data-atab="login" onclick="switchAuth('login')">Đăng nhập</button>
+<button class="tab" data-atab="register" onclick="switchAuth('register')">Đăng ký</button>
+</div>
+<div id="auth-login">
+<h2>Chào mừng trở lại</h2>
+<p class="modal-sub">Đăng nhập để quản lý chuyến đi của bạn</p>
+<div class="field" style="margin-bottom:10px"><label>Email hoặc số điện thoại</label><input id="liEmail" placeholder="ban@email.com hoặc 09xxxxxxxx"/></div>
+<div class="field" style="margin-bottom:10px"><label>Mật khẩu</label><input id="liPass" placeholder="••••••••" type="password"/></div>
+<div style="text-align:right;margin-bottom:14px"><a href="#" onclick="event.preventDefault();forgotPass()" style="font-size:.85rem">Quên mật khẩu?</a></div>
+<button class="btn btn-primary btn-block" onclick="login()"><i class="fas fa-sign-in-alt"></i> Đăng nhập</button>
+<div style="text-align:center;margin-top:12px;font-size:.9rem">Chưa có tài khoản? <a href="#" onclick="event.preventDefault();switchAuth('register')">Đăng ký</a></div>
+<div style="text-align:center;color:var(--text-muted);margin:14px 0;font-size:.85rem">— hoặc —</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button class="btn btn-ghost" onclick="socialLogin('Google')"><i class="fab fa-google" style="color:#ea4335"></i> Đăng nhập Google</button>
+<button class="btn btn-ghost" onclick="socialLogin('Facebook')"><i class="fab fa-facebook" style="color:#1877f2"></i> Đăng nhập Facebook</button>
+</div>
+<button class="btn btn-ghost btn-block" onclick="otpLogin()" style="margin-top:8px"><i class="fas fa-mobile-alt"></i> Đăng nhập OTP</button>
+</div>
+<div id="auth-register" style="display:none">
+<h2>Tạo tài khoản miễn phí</h2>
+<p class="modal-sub">Tham gia 150K+ du khách Việt</p>
+<div class="field" style="margin-bottom:10px"><label>Họ tên</label><input id="rgName" placeholder="Nguyễn Văn A"/></div>
+<div class="field" style="margin-bottom:10px"><label>Email</label><input id="rgEmail" placeholder="ban@email.com" type="email"/></div>
+<div class="field" style="margin-bottom:10px"><label>Số điện thoại</label><input id="rgPhone" placeholder="09xxxxxxxx" type="tel"/></div>
+<div class="field" style="margin-bottom:10px"><label>Mật khẩu</label><input id="rgPass" placeholder="Ít nhất 6 ký tự" type="password"/></div>
+<div class="field" style="margin-bottom:10px"><label>Xác nhận mật khẩu</label><input id="rgPass2" placeholder="Nhập lại mật khẩu" type="password"/></div>
+<label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0;font-size:.85rem;cursor:pointer"><input id="rgTerms" style="margin-top:3px" type="checkbox"/> <span>Tôi đồng ý với <a href="#" onclick="event.preventDefault()">Điều khoản sử dụng</a> và <a href="#" onclick="event.preventDefault()">Chính sách bảo mật</a></span></label>
+<button class="btn btn-primary btn-block" onclick="register()"><i class="fas fa-user-plus"></i> Đăng ký</button>
+<div style="text-align:center;margin-top:12px;font-size:.9rem">Đã có tài khoản? <a href="#" onclick="event.preventDefault();switchAuth('login')">Đăng nhập</a></div>
+</div>
+</div>
+</div>
+<div class="modal-back" id="cartModal">
+<div class="modal wide">
+<button class="modal-close" onclick="closeModal('cartModal')"><i class="fas fa-times"></i></button>
+<h2><i class="fas fa-shopping-cart"></i> Giỏ hàng</h2>
+<p class="modal-sub">Sản phẩm bạn đã chọn</p>
+<div id="cartBody"></div>
+</div>
+</div>
+<div class="modal-back" id="payModal">
+<div class="modal wide">
+<button class="modal-close" onclick="closeModal('payModal')"><i class="fas fa-times"></i></button>
+<h2><i class="fas fa-credit-card"></i> Thanh toán</h2>
+<p class="modal-sub" id="paySub">Vui lòng chọn phương thức</p>
+<div class="pay-methods" id="payMethods">
+<div class="pay-method active" data-m="vietqr" onclick="pickPay('vietqr')"><i class="fas fa-qrcode"></i><div>VietQR</div></div>
+<div class="pay-method" data-m="momo" onclick="pickPay('momo')"><i class="fas fa-mobile-alt"></i><div>Momo</div></div>
+<div class="pay-method" data-m="zalo" onclick="pickPay('zalo')"><i class="fas fa-comment-dollar"></i><div>ZaloPay</div></div>
+<div class="pay-method" data-m="vnpay" onclick="pickPay('vnpay')"><i class="fas fa-university"></i><div>VNPay</div></div>
+<div class="pay-method" data-m="stripe" onclick="pickPay('stripe')"><i class="fab fa-stripe-s"></i><div>Stripe</div></div>
+<div class="pay-method" data-m="paypal" onclick="pickPay('paypal')"><i class="fab fa-paypal"></i><div>PayPal</div></div>
+</div>
+<div id="payContent"></div>
+</div>
+</div>
+<div class="modal-back" id="detailModal"><div class="modal x-wide"><button class="modal-close" onclick="closeModal('detailModal')"><i class="fas fa-times"></i></button><div id="detailBody"></div></div></div>
+<footer class="footer">
+<div class="container-xxl">
+<div class="footer-grid">
+<div>
+<div class="footer-brand"><div class="brand-logo"><i class="fas fa-map-marked-alt"></i></div> TOUR-HUB</div>
+<p style="color:var(--text-muted);font-size:.9rem;max-width:320px">Quét một mã, chạm cả hành trình. Nền tảng du lịch số thông minh — QR, Story, Food, Service, Check-in, OCOP, HDV, AI Planner &amp; thanh toán VietQR.</p>
+<div class="footer-social">
+<button class="icon-btn" title="Facebook"><i class="fab fa-facebook-f"></i></button>
+<button class="icon-btn" title="Instagram"><i class="fab fa-instagram"></i></button>
+<button class="icon-btn" title="TikTok"><i class="fab fa-tiktok"></i></button>
+<button class="icon-btn" title="YouTube"><i class="fab fa-youtube"></i></button>
+</div>
+</div>
+<div>
+<h6>Khám phá</h6>
+<a onclick="go('story')">Story Hub</a>
+<a onclick="go('food')">Food Hub</a>
+<a onclick="go('service')">Service Hub</a>
+<a onclick="go('checkin')">Check-in Hub</a>
+<a onclick="go('qr')">Quét QR</a>
+</div>
+<div>
+<h6>Tiện ích</h6>
+<a onclick="go('ocop')">OCOP Hub</a>
+<a onclick="go('guide')">Guide Marketplace</a>
+<a onclick="go('planner')">AI Travel Planner</a>
+<a onclick="openCart()">Giỏ hàng</a>
+<a onclick="go('profile')">Hồ sơ của tôi</a>
+</div>
+<div>
+<h6>Liên hệ</h6>
+<a><i class="fas fa-envelope"></i> iuh@tourhub.vn</a>
+<a><i class="fas fa-phone"></i> 0987.655.783</a>
+<a><i class="fas fa-map-marker-alt"></i> TP. Hồ Chí Minh, Việt Nam</a>
+<a><i class="fas fa-headset"></i> Hỗ trợ qua email</a>
+</div>
+</div>
+<div class="footer-bottom">© 2026 TOUR-HUB · Smart Tourism Platform Việt Nam · Made with <i class="fas fa-heart" style="color:var(--danger)"></i> in Vietnam</div>
+</div>
+</footer>
+<div id="toast"></div>
+<div class="mob-nav">
+<button data-mp="home" onclick="go('home')"><i class="fas fa-home"></i>Home</button>
+<button data-mp="qr" onclick="go('qr')"><i class="fas fa-qrcode"></i>Quét QR</button>
+<button data-mp="ocop" onclick="go('ocop')"><i class="fas fa-shopping-basket"></i>OCOP</button>
+<button data-mp="checkin" onclick="go('checkin')"><i class="fas fa-camera"></i>Check-in</button>
+<button data-mp="profile" onclick="go('profile')"><i class="fas fa-user"></i>Tôi</button>
+</div>
+<script>window.TH_PAGE='ocop';</script><script defer src="assets/map-fix.js"></script><script defer src="assets/gmaps.js"></script><script defer src="assets/app.js"></script><script defer src="assets/planner-v19.js"></script>
+<script defer src="assets/router.js"></script>
+</body>
+</html>

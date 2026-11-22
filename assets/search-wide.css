@@ -1,0 +1,36 @@
+/* TOUR-HUB — Ô tìm kiếm trên thanh điều hướng: kéo dài, không bị cắt chữ
+ * Nạp SAU assets/app.css. Dùng chung cho mọi trang có thanh nav.
+ */
+.nav-right{
+  flex:1 1 auto;
+  min-width:0;
+  justify-content:flex-end;
+}
+.nav-right .search-mini{
+  position:relative;
+  flex:1 1 360px;
+  width:auto !important;
+  min-width:200px;
+  max-width:560px;
+}
+.nav-right .search-mini input{
+  width:100% !important;
+  min-width:0;
+  text-overflow:ellipsis;
+}
+.nav-right .search-mini .search-suggest{
+  left:0;
+  right:0;
+  width:100%;
+  min-width:280px;
+}
+/* Các nút bên cạnh không bị co lại khi ô tìm kiếm giãn ra */
+.nav-right > *:not(.search-mini){flex-shrink:0}
+.nav-menu{flex-shrink:0}
+
+@media (max-width:1100px){
+  .nav-right .search-mini{flex-basis:260px;max-width:360px}
+}
+@media (max-width:768px){
+  .nav-right .search-mini{flex:1 1 100%;max-width:none;min-width:0}
+}

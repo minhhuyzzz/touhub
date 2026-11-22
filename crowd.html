@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta content="#013230" name="theme-color"/>
+<meta content="TOUR-HUB — Bản đồ mật độ khách và giờ vàng: biết điểm nào đang đông, đi giờ nào thoải mái, góp phần giãn tải và du lịch xanh." name="description"/>
+<title>Giờ vàng &amp; Mật độ khách | TOUR-HUB</title>
+<link href="https://cdn-icons-png.flaticon.com/512/3097/3097144.png" rel="icon" type="image/png"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Anton&amp;family=Playfair+Display:ital,wght@1,500;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="assets/app.css" rel="stylesheet"/><link href="assets/search-wide.css" rel="stylesheet"/>
+<style>
+/* Mọi màu đều dùng biến của app.css, có giá trị dự phòng nếu thiếu */
+#page-crowd{font-family:'Be Vietnam Pro',system-ui,sans-serif}
+.cw-card{background:var(--surface,#fff);border:1px solid var(--border,#e2e8f0);border-radius:var(--radius,14px);padding:16px}
+.cw-title{font-weight:700;font-size:1rem;margin:0 0 10px;display:flex;align-items:center;gap:8px}
+.cw-chips{display:flex;gap:6px;flex-wrap:wrap}
+.cw-chip{border:1px solid var(--border,#e2e8f0);background:transparent;color:var(--text,#0f172a);border-radius:999px;padding:6px 13px;font-size:.84rem;cursor:pointer;font-weight:500;font-family:inherit}
+.cw-chip.on{background:#0f766e;border-color:#0f766e;color:#fff}
+.cw-hour{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.cw-hour input[type=range]{flex:1;min-width:180px;accent-color:#0f766e}
+.cw-hour-lbl{font-weight:800;font-size:1.4rem;min-width:70px;font-variant-numeric:tabular-nums}
+.cw-kpi{display:flex;align-items:center;gap:12px}
+.cw-kpi b{font-size:1.7rem;line-height:1}
+.cw-dot{width:14px;height:14px;border-radius:50%;flex:none}
+.cw-muted{color:var(--text-muted,#64748b);font-size:.85rem}
+#crowdMap{height:500px;border-radius:12px;overflow:hidden;z-index:0}
+.cm-wrap{background:none;border:none}
+.cm{width:46px;height:46px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);transition:transform .15s}
+.cm.sel{transform:scale(1.25);border-color:#0f172a;box-shadow:0 0 0 4px rgba(15,118,110,.45)}
+.cm.pulse{animation:cwp 1.6s infinite}
+@keyframes cwp{0%{box-shadow:0 0 0 0 rgba(220,38,38,.6)}100%{box-shadow:0 0 0 16px rgba(220,38,38,0)}}
+.cw-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:.82rem}
+.cw-legend span{display:flex;align-items:center;gap:6px}
+.cw-list{max-height:500px;overflow:auto;display:flex;flex-direction:column;gap:8px;padding-right:4px}
+.cw-item{border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--surface,#fff);transition:border-color .15s,transform .15s}
+.cw-item:hover{transform:translateY(-1px);border-color:#0f766e}
+.cw-item.sel{border:2px solid #0f766e}
+.cw-item-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cw-item-name{font-weight:700;font-size:.95rem}
+.cw-pill{color:#fff;border-radius:999px;padding:2px 10px;font-size:.74rem;font-weight:700;white-space:nowrap}
+.cw-bar{height:7px;border-radius:99px;background:rgba(148,163,184,.3);margin:8px 0 6px;overflow:hidden}
+.cw-bar i{display:block;height:100%;border-radius:99px}
+.cw-box{border:1px solid var(--border,#e2e8f0);border-radius:12px;padding:12px;height:100%}
+.cw-box small{display:block;color:var(--text-muted,#64748b);font-size:.78rem;margin-bottom:2px}
+.cw-box b{font-size:1.15rem}
+.cw-box.gold{border-color:#16a34a;background:rgba(22,163,74,.08)}
+.cw-box.avoid{border-color:#dc2626;background:rgba(220,38,38,.07)}
+.cw-chart{position:relative;height:300px}
+.cw-chart.sm{height:220px}
+.cw-eco{background:linear-gradient(135deg,rgba(22,163,74,.12),rgba(14,165,233,.1));border:1px solid rgba(22,163,74,.35);border-radius:12px;padding:14px}
+.cw-eco input[type=range]{width:100%;accent-color:#16a34a}
+.cw-pts{background:#16a34a;color:#fff;border-radius:999px;padding:5px 14px;font-weight:700;font-size:.85rem;display:inline-flex;gap:6px;align-items:center}
+.cw-btn{border:none;border-radius:10px;padding:9px 16px;font-weight:600;font-size:.88rem;cursor:pointer;font-family:inherit;display:inline-flex;gap:8px;align-items:center}
+.cw-btn.pri{background:#0f766e;color:#fff}
+.cw-btn.gh{background:transparent;color:var(--text,#0f172a);border:1px solid var(--border,#e2e8f0)}
+.cw-btn.gr{background:#16a34a;color:#fff}
+#cwToast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%) translateY(20px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;font-size:.88rem;opacity:0;pointer-events:none;transition:.25s;z-index:3000;max-width:90vw}
+#cwToast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.map-fail{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+@media(max-width:768px){#crowdMap{height:380px}.cw-hour-lbl{font-size:1.15rem}}
+
+/* ---- Chống tràn ngang ---- */
+html,body{max-width:100%;overflow-x:hidden}
+#page-crowd{overflow-x:clip;max-width:100vw}
+#page-crowd .container-xxl{padding-left:16px;padding-right:16px}
+#page-crowd [class*="col-"]{min-width:0}
+#page-crowd .cw-card,#page-crowd .cw-box,#page-crowd .cw-eco{min-width:0;max-width:100%}
+#page-crowd .cw-chart{width:100%;min-width:0;overflow:hidden}
+#page-crowd canvas{max-width:100%!important}
+#crowdMap,.leaflet-container{max-width:100%}
+.cw-item-name{min-width:0;overflow-wrap:anywhere}
+.nav-wrap{max-width:100%}
+.nav-menu{min-width:0;overflow-x:auto;scrollbar-width:none}
+.nav-menu::-webkit-scrollbar{display:none}
+.nav-link{white-space:nowrap;flex:none}
+@media(max-width:480px){.cw-hour input[type=range]{min-width:120px}.cw-pill{font-size:.7rem}}
+
+/* ---- Leaflet: chặn rule img chung làm vỡ ô bản đồ ---- */
+.leaflet-container img,.leaflet-container .leaflet-tile,.leaflet-pane img{max-width:none!important;max-height:none!important}
+.leaflet-container .leaflet-tile{width:256px;height:256px}
+.leaflet-container{font-family:inherit;background:#dbe7e4}
+#crowdMap{min-height:380px;position:relative}
+.map-warn{position:absolute;left:10px;right:10px;bottom:10px;z-index:900;background:rgba(15,23,42,.88);color:#fff;border-radius:10px;padding:8px 12px;font-size:.8rem}
+
+/* ---- Ghim: mũi nhọn nằm đúng tọa độ ---- */
+.cm{width:42px;height:42px;position:relative;transform-origin:50% 124%;font-size:.76rem}
+.cm::after{content:"";position:absolute;left:50%;bottom:-11px;transform:translateX(-50%);border:8px solid transparent;border-top:11px solid var(--c);border-bottom:0}
+.cm.sel{transform:scale(1.2)}
+.me-dot{width:16px;height:16px;border-radius:50%;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 0 rgba(37,99,235,.6);animation:cwme 1.8s infinite}
+@keyframes cwme{0%{box-shadow:0 0 0 0 rgba(37,99,235,.55)}100%{box-shadow:0 0 0 18px rgba(37,99,235,0)}}
+</style>
+<script src="assets/gmaps.js"></script></head>
+<body>
+<nav class="nav">
+<div class="nav-wrap">
+<div class="brand" onclick="go('home')">
+<div class="brand-logo"><i class="fas fa-map-marked-alt"></i></div>
+<span>TOUR-HUB</span>
+</div>
+<div class="nav-menu">
+<div class="nav-link" data-page="home" onclick="go('home')">Home</div>
+<div class="nav-link" data-page="story" onclick="go('story')">Story</div>
+<div class="nav-link" data-page="food" onclick="go('food')">Food</div>
+<div class="nav-link" data-page="service" onclick="go('service')">Service</div>
+<div class="nav-link" data-page="checkin" onclick="go('checkin')">Check-in</div>
+<div class="nav-link active" data-page="crowd" onclick="go('crowd')"><i class="fas fa-leaf" style="font-size:.78rem;margin-right:3px"></i>Giờ vàng</div>
+<div class="nav-link" data-page="ocop" onclick="go('ocop')">OCOP</div>
+<div class="nav-link" data-page="guide" onclick="go('guide')">Guide</div>
+<div class="nav-link" data-page="planner" onclick="go('planner')"><i class="fas fa-wand-magic-sparkles" style="font-size:.78rem;margin-right:3px"></i>Planner</div>
+</div>
+<div class="nav-right">
+<button class="icon-btn" onclick="go('qr')" title="Quét QR"><i class="fas fa-qrcode"></i></button>
+<button class="icon-btn" id="cwTheme" title="Đổi giao diện"><i class="fas fa-moon" id="cwThemeIcon"></i></button>
+</div>
+</div>
+</nav>
+
+<div class="page active" id="page-crowd">
+
+<!-- BANNER (cùng kiểu với các trang Story/Food/Service...) -->
+<div class="pg-banner">
+<video class="pg-video" autoplay muted loop playsinline preload="metadata"><source src="assets/crowd-bg.mp4" type="video/mp4"></video>
+<div class="pg-ov"></div>
+<div class="pg-in">
+<span class="pg-ic"><i class="fas fa-leaf"></i></span>
+<div>
+<div class="pg-bc"><a onclick="go('home')">Trang chủ</a> / Giờ vàng</div>
+<h2>Mật độ khách &amp; Giờ vàng</h2>
+<p>Biết điểm nào đang đông, đi giờ nào thoải mái nhất — giãn tải cho điểm đến, trải nghiệm tốt hơn cho bạn.</p>
+</div>
+<div class="cw-pts" style="margin-left:auto;align-self:flex-start" title="Điểm xanh khi chọn đi giờ vàng"><i class="fas fa-seedling"></i> Điểm xanh: <span id="cwPoints">0</span></div>
+</div>
+</div>
+
+<div class="container-xxl section-sm">
+
+<!-- BỘ LỌC THỜI GIAN -->
+<div class="cw-card" style="margin-bottom:14px">
+<div class="row g-3 align-items-center">
+<div class="col-lg-6">
+<div class="cw-muted" style="margin-bottom:6px"><i class="fas fa-calendar-day"></i> Chọn ngày</div>
+<div class="cw-chips" id="cwDays"></div>
+</div>
+<div class="col-lg-6">
+<div class="cw-muted" style="margin-bottom:6px"><i class="fas fa-clock"></i> Chọn giờ <span id="cwNowTag"></span></div>
+<div class="cw-hour">
+<span class="cw-hour-lbl" id="cwHourLbl">--:--</span>
+<input id="cwHour" max="23" min="0" step="1" type="range" value="12"/>
+<button class="cw-chip" id="cwNowBtn" type="button"><i class="fas fa-location-crosshairs"></i> Bây giờ</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- KPI -->
+<div class="row g-3" style="margin-bottom:14px" id="cwKpi"></div>
+
+<!-- BẢN ĐỒ + DANH SÁCH -->
+<div class="row g-3" style="margin-bottom:14px">
+<div class="col-lg-7">
+<div class="cw-card">
+<div class="cw-title"><i class="fas fa-map-location-dot"></i> Bản đồ mật độ ước tính
+<span style="margin-left:auto;display:flex;gap:6px"><button class="cw-chip" id="cwLocate" type="button"><i class="fas fa-location-crosshairs"></i> Vị trí của tôi</button><button class="cw-chip" id="cwFit" type="button"><i class="fas fa-expand"></i> Toàn quốc</button></span></div>
+<div class="cw-tabs" role="tablist"><button class="cw-chip on" id="cwTabD" type="button" role="tab" aria-selected="true"><i class="fas fa-chart-simple"></i> Mật độ ước tính</button><button class="cw-chip" id="cwTabG" type="button" role="tab" aria-selected="false"><i class="fas fa-map"></i> Google Maps trực tiếp</button></div>
+<div id="crowdMap"></div>
+<div id="crowdG" hidden><div id="crowdGMap" style="height:500px;border-radius:12px"></div><div class="cw-muted" style="margin-top:6px"><i class="fas fa-circle-info"></i> Dữ liệu trực tiếp từ Google Maps: mở thẻ địa điểm để xem giờ mở cửa và mức “đang đông” ngay lúc này.</div></div>
+<div class="cw-legend" id="cwLegend"></div>
+</div>
+</div>
+<div class="col-lg-5">
+<div class="cw-card">
+<div class="cw-title"><i class="fas fa-ranking-star"></i> Điểm đến
+<button class="cw-chip" id="cwSort" style="margin-left:auto" type="button"></button></div>
+<div class="cw-chips" id="cwFilter" style="margin-bottom:10px"></div>
+<div class="cw-list" id="cwList"></div>
+</div>
+</div>
+</div>
+
+<!-- CHI TIẾT -->
+<div class="cw-card" id="cwDetail">
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-2" style="margin-bottom:12px">
+<div>
+<h3 style="margin:0;font-size:1.3rem;font-weight:800" id="detTitle"></h3>
+<div class="cw-muted" id="detSub"></div>
+</div>
+<span class="cw-pill" id="detPill" style="font-size:.9rem;padding:5px 14px"></span>
+</div>
+
+<div class="row g-3" style="margin-bottom:14px">
+<div class="col-6 col-lg-3"><div class="cw-box gold"><small><i class="fas fa-sun"></i> Giờ vàng nên đến</small><b id="detGold">-</b><div class="cw-muted" id="detGoldSub"></div></div></div>
+<div class="col-6 col-lg-3"><div class="cw-box avoid"><small><i class="fas fa-ban"></i> Nên tránh</small><b id="detAvoid">-</b><div class="cw-muted" id="detAvoidSub"></div></div></div>
+<div class="col-6 col-lg-3"><div class="cw-box"><small><i class="fas fa-calendar-check"></i> Ngày đẹp nhất tuần</small><b id="detBest">-</b><div class="cw-muted" id="detBestSub"></div></div></div>
+<div class="col-6 col-lg-3"><div class="cw-box"><small><i class="fas fa-user-check"></i> Check-in thực hôm nay</small><b id="detReal">0</b><div class="cw-muted" id="detRealSub"></div></div></div>
+</div>
+
+<div class="cw-title"><i class="fas fa-chart-column"></i> Dự báo mật độ 24 giờ <span class="cw-muted" style="font-weight:400">(% sức chứa thoải mái)</span></div>
+<div class="cw-chart"><canvas id="chart24"></canvas></div>
+
+<div class="row g-3" style="margin-top:6px">
+<div class="col-lg-6">
+<div class="cw-eco">
+<div class="cw-title" style="margin-bottom:6px"><i class="fas fa-recycle" style="color:#16a34a"></i> Mô phỏng giãn tải</div>
+<div class="cw-muted" style="margin-bottom:8px">Nếu <b id="shiftVal">0</b>% lượng khách ở giờ cao điểm chuyển sang giờ vắng:</div>
+<input id="shiftRange" max="60" min="0" step="5" type="range" value="25"/>
+<div id="shiftOut" style="margin-top:10px;font-size:.92rem"></div>
+</div>
+</div>
+<div class="col-lg-6">
+<div class="cw-title"><i class="fas fa-calendar-week"></i> Mật độ trung bình 7 ngày tới</div>
+<div class="cw-chart sm"><canvas id="chartWeek"></canvas></div>
+</div>
+</div>
+
+<div class="d-flex flex-wrap gap-2" style="margin-top:14px">
+<button class="cw-btn gr" id="btnPlan" type="button"><i class="fas fa-seedling"></i> Chọn đi giờ vàng (+10 điểm xanh)</button>
+<button class="cw-btn pri" id="btnCheckin" type="button"><i class="fas fa-camera-retro"></i> Check-in nhanh tại đây</button>
+<a class="cw-btn gh" id="btnRoute" target="_blank" rel="noopener" style="text-decoration:none"><i class="fas fa-diamond-turn-right"></i> Chỉ đường</a>
+<button class="cw-btn gh" id="btnCopy" type="button"><i class="fas fa-copy"></i> Sao chép lịch giờ vàng</button>
+</div>
+</div>
+
+<p class="cw-muted" style="margin-top:14px">
+<i class="fas fa-circle-info"></i> Cách tính: mô hình dự báo kết hợp đường cong giờ cao điểm theo loại điểm đến, ngày trong tuần, mùa vụ, ngày lễ và <b>check-in thực</b> của người dùng TOUR-HUB trong ngày. Số liệu nền hiện là <b>mô phỏng cho bản demo</b>; khi có dữ liệu check-in, vé QR hoặc cảm biến thật, chỉ cần đẩy vào là mô hình tự cập nhật.
+</p>
+</div>
+</div>
+
+<footer class="footer">
+<div class="container-xxl">
+<div class="footer-grid">
+<div>
+<div class="footer-brand"><div class="brand-logo"><i class="fas fa-map-marked-alt"></i></div> TOUR-HUB</div>
+<p style="color:var(--text-muted);font-size:.9rem;max-width:320px">Quét một mã, chạm cả hành trình. Nền tảng du lịch số thông minh — QR, Story, Food, Service, Check-in, OCOP, HDV, AI Planner &amp; thanh toán VietQR.</p>
+<div class="footer-social">
+<button class="icon-btn" title="Facebook"><i class="fab fa-facebook-f"></i></button>
+<button class="icon-btn" title="Instagram"><i class="fab fa-instagram"></i></button>
+<button class="icon-btn" title="TikTok"><i class="fab fa-tiktok"></i></button>
+<button class="icon-btn" title="YouTube"><i class="fab fa-youtube"></i></button>
+</div>
+</div>
+<div>
+<h6>Khám phá</h6>
+<a onclick="go('story')">Story Hub</a>
+<a onclick="go('food')">Food Hub</a>
+<a onclick="go('service')">Service Hub</a>
+<a onclick="go('checkin')">Check-in Hub</a>
+<a onclick="go('crowd')">Giờ vàng</a>
+<a onclick="go('qr')">Quét QR</a>
+</div>
+<div>
+<h6>Tiện ích</h6>
+<a onclick="go('ocop')">OCOP Hub</a>
+<a onclick="go('guide')">Guide Marketplace</a>
+<a onclick="go('planner')">AI Travel Planner</a>
+<a onclick="go('home')">Giỏ hàng</a>
+<a onclick="go('home')">Hồ sơ của tôi</a>
+</div>
+<div>
+<h6>Liên hệ</h6>
+<a><i class="fas fa-envelope"></i> iuh@tourhub.vn</a>
+<a><i class="fas fa-phone"></i> 0987.655.783</a>
+<a><i class="fas fa-map-marker-alt"></i> TP. Hồ Chí Minh, Việt Nam</a>
+<a><i class="fas fa-headset"></i> Hỗ trợ qua email</a>
+</div>
+</div>
+<div class="footer-bottom">© 2026 TOUR-HUB · Smart Tourism Platform Việt Nam · Made with <i class="fas fa-heart" style="color:var(--danger)"></i> in Vietnam</div>
+</div>
+</footer>
+<div class="mob-nav">
+<button onclick="go('home')"><i class="fas fa-home"></i>Home</button>
+<button onclick="go('qr')"><i class="fas fa-qrcode"></i>Quét QR</button>
+<button class="active" onclick="go('crowd')"><i class="fas fa-leaf"></i>Giờ vàng</button>
+<button onclick="go('checkin')"><i class="fas fa-camera"></i>Check-in</button>
+<button onclick="go('ocop')"><i class="fas fa-shopping-basket"></i>OCOP</button>
+</div>
+<div id="cwToast"></div>
+
+<script>
+/* ===== Điều hướng giữa các trang (độc lập với assets/app.js) ===== */
+function go(p){ location.href = (p==='home'?'index':p)+'.html'; }
+
+document.addEventListener('DOMContentLoaded',function(){
+'use strict';
+
+/* ===== Mức độ đông ===== */
+const LV=[
+ {k:'quiet',label:'Vắng',color:'#16a34a'},
+ {k:'mid',label:'Vừa phải',color:'#ca8a04'},
+ {k:'busy',label:'Đông',color:'#ea580c'},
+ {k:'full',label:'Quá tải',color:'#dc2626'}];
+const CLOSED={k:'closed',label:'Ngoài giờ',color:'#94a3b8'};
+const lv=p=>p==null?CLOSED:p<35?LV[0]:p<65?LV[1]:p<90?LV[2]:LV[3];
+
+/* ===== Dữ liệu điểm đến =====
+ peaks: [giờ đỉnh, độ rộng, trọng số]; load: tỷ lệ lấp đầy ở giờ đỉnh ngày thường; open: [mở, đóng] */
+const DEST=[
+ {id:'hoian',name:'Phố cổ Hội An',prov:'Quảng Nam',lat:15.8794,lng:108.3350,cap:5200,load:.72,season:'central',open:[5,23],peaks:[[9.5,1.6,.7],[17.5,1.8,.8],[20,1.6,1]]},
+ {id:'hanoi',name:'Phố cổ Hà Nội',prov:'Hà Nội',lat:21.0345,lng:105.8510,cap:9000,load:.75,season:'north',open:[5,23],peaks:[[9.5,1.8,.7],[15,1.8,.6],[19.5,2,1]]},
+ {id:'sapa',name:'Sa Pa',prov:'Lào Cai',lat:22.3364,lng:103.8438,cap:4200,load:.68,season:'sapa',open:[5,21],peaks:[[7,1.2,.6],[11,2,1],[16,1.5,.5]]},
+ {id:'hue',name:'Đại Nội Huế',prov:'Thừa Thiên Huế',lat:16.4698,lng:107.5786,cap:3800,load:.66,season:'central',open:[7,17.5],peaks:[[9.5,1.5,1],[15.5,1.4,.6]]},
+ {id:'banah',name:'Bà Nà Hills',prov:'Đà Nẵng',lat:15.9977,lng:107.9886,cap:11000,load:.78,season:'central',open:[8,20],peaks:[[10.5,1.8,1],[14.5,1.6,.7]]},
+ {id:'phuquoc',name:'Phú Quốc',prov:'Kiên Giang',lat:10.2167,lng:103.9667,cap:8000,load:.7,season:'beach',open:[5,22],peaks:[[8.5,1.5,.6],[16.5,1.5,.8],[18,1.3,.7]]},
+ {id:'dalat',name:'Đà Lạt',prov:'Lâm Đồng',lat:11.9430,lng:108.4420,cap:6500,load:.74,season:'dalat',open:[5,22],peaks:[[9,1.6,.7],[16,1.8,.8],[20,1.5,.8]]},
+ {id:'halong',name:'Vịnh Hạ Long',prov:'Quảng Ninh',lat:20.9101,lng:107.1839,cap:7000,load:.7,season:'halong',open:[6,17],peaks:[[10,1.8,1],[14,2,.7]]},
+ {id:'trangan',name:'Tràng An – Ninh Bình',prov:'Ninh Bình',lat:20.2514,lng:105.8980,cap:4500,load:.7,season:'northNature',open:[7,17],peaks:[[9.5,1.5,1],[13.5,1.5,.6]]},
+ {id:'benthanh',name:'Chợ Bến Thành',prov:'TP. Hồ Chí Minh',lat:10.7725,lng:106.6980,cap:6000,load:.73,season:'south',open:[6,22],peaks:[[8,1.5,.7],[12,1.5,.5],[19.5,2,1]]}
+];
+const SEASON={ // hệ số theo tháng 1–12
+ central:[.7,.75,.9,1,1.15,1.3,1.3,1.2,.9,.75,.65,.7],
+ north:[1.15,1,.95,.95,.9,.85,.8,.8,1,1.1,1.1,1.1],
+ northNature:[1.3,1.15,1,1,.9,.9,.85,.8,.95,1.05,1,1],
+ sapa:[1.1,.8,1.05,1.1,.8,.7,.7,.75,1.1,1.3,1.2,1],
+ beach:[1.25,1.1,1,1,.8,.6,.6,.6,.65,.85,1.15,1.3],
+ dalat:[1.3,1.1,.95,.95,.85,.8,.8,.8,.8,.9,1.1,1.35],
+ halong:[.8,.9,1,1.1,1.2,1.3,1.35,1.25,.95,.9,.8,.75],
+ south:[1.2,1.05,1,1,.9,.9,.9,.9,.95,1,1.05,1.2]};
+const DOW=[1.3,.9,.88,.9,.95,1.15,1.4]; // CN..T7
+const HOLI=['0-1','3-30','4-1','8-2']; // tháng-ngày (0-based tháng): 1/1, 30/4, 1/5, 2/9
+
+function mkCurve(pk){const a=[];for(let h=0;h<24;h++){let v=.12;pk.forEach(([m,s,w])=>{v+=w*Math.exp(-((h-m)**2)/(2*s*s));});a.push(v);}
+ const mx=Math.max(...a);return a.map(v=>v/mx);}
+DEST.forEach(d=>d.curve=mkCurve(d.peaks));
+const byId=Object.fromEntries(DEST.map(d=>[d.id,d]));
+
+/* ===== Tiện ích thời gian (giờ Việt Nam) ===== */
+const WD=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'];
+const WDS=['CN','T2','T3','T4','T5','T6','T7'];
+const vnNow=()=>new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+const dkey=d=>d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+const pad=n=>String(n).padStart(2,'0');
+const hh=h=>pad(Math.floor(h))+':'+(h%1?'30':'00');
+const NOW=vnNow();
+const BASE=new Date(NOW.getFullYear(),NOW.getMonth(),NOW.getDate());
+const dateOf=i=>new Date(BASE.getFullYear(),BASE.getMonth(),BASE.getDate()+i);
+const dlabel=d=>WDS[d.getDay()]+' '+pad(d.getDate())+'/'+pad(d.getMonth()+1);
+function rnd(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return((h>>>0)%10000)/10000;}
+
+/* ===== Check-in thực (đọc từ localStorage + API đẩy vào) ===== */
+const REAL={};DEST.forEach(d=>REAL[d.id]=Array(24).fill(0));
+const REAL_SCALE=60; // 1 check-in ≈ 60 lượt khách (hệ số ngoại suy cho demo)
+let realTotal=0;
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/gi,'d').toLowerCase();
+const KW={hoian:['hoi an'],hanoi:['ha noi','hanoi'],sapa:['sa pa','sapa'],hue:['hue','dai noi'],banah:['ba na','da nang'],phuquoc:['phu quoc'],dalat:['da lat','dalat'],halong:['ha long','halong'],trangan:['trang an','ninh binh'],benthanh:['ben thanh','sai gon','ho chi minh','tphcm']};
+const KWRE=Object.fromEntries(Object.entries(KW).map(([id,a])=>[id,new RegExp('\\b('+a.join('|')+')\\b')]));
+function matchDest(t){for(const id in KWRE){if(KWRE[id].test(t))return id;}return null;}
+function ingestOne(o){
+  if(!o||typeof o!=='object')return;
+  const txt=norm(['destId','place','location','destination','dest','title','caption','name','city','address','tag'].map(f=>o[f]).filter(x=>typeof x==='string').join(' '));
+  const id=byId[o.destId]?o.destId:matchDest(txt);if(!id)return;
+  const t=o.createdAt||o.time||o.ts||o.timestamp||o.date;if(!t)return;
+  const dt=new Date(t);if(isNaN(dt))return;
+  const l=new Date(dt.toLocaleString('en-US',{timeZone:'Asia/Ho_Chi_Minh'}));
+  if(dkey(l)!==dkey(BASE))return;
+  REAL[id][l.getHours()]++;realTotal++;
+}
+function loadReal(){
+  DEST.forEach(d=>REAL[d.id].fill(0));realTotal=0;
+  try{
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);if(!/check|feed|post/i.test(k))continue;
+      let v;try{v=JSON.parse(localStorage.getItem(k));}catch(e){continue;}
+      const arr=Array.isArray(v)?v:(v&&Array.isArray(v.items)?v.items:null);
+      if(arr)arr.forEach(ingestOne);
+    }
+  }catch(e){}
+  try{(window.TH_CHECKINS||[]).forEach(ingestOne);}catch(e){}
+}
+/* API cho app.js: window.THCrowd.ingest([{destId|place, createdAt}, ...]) */
+window.THCrowd={ingest:function(list){(list||[]).forEach(ingestOne);refresh();}};
+
+/* ===== Mô hình dự báo ===== */
+function pctAt(d,date,h){
+  if(h<d.open[0]||h>=d.open[1])return null;
+  const hol=HOLI.indexOf(date.getMonth()+'-'+date.getDate())>=0?1.25:1;
+  const noise=.94+.12*rnd(d.id+dkey(date)+h);
+  let p=d.load*100*d.curve[h]*DOW[date.getDay()]*SEASON[d.season][date.getMonth()]*hol*noise;
+  if(dkey(date)===dkey(BASE))p+=REAL[d.id][h]*REAL_SCALE/d.cap*100;
+  return Math.min(140,p);
+}
+const dayArr=(d,date)=>Array.from({length:24},(_,h)=>pctAt(d,date,h));
+function windows(d,arr){
+  let best=null,worst=null;
+  for(let h=Math.max(6,Math.ceil(d.open[0]));h+1<Math.min(22,d.open[1]);h++){
+    if(arr[h]==null||arr[h+1]==null)continue;
+    const a=(arr[h]+arr[h+1])/2;
+    if(!best||a<best.avg)best={s:h,e:h+2,avg:a};
+    if(!worst||a>worst.avg)worst={s:h,e:h+2,avg:a};
+  }
+  return {best,worst};
+}
+function shiftArr(d,arr,f){
+  // Chuyển f% khách ở các giờ trên 60%, dồn sang các giờ đang dưới 45% (6h–22h)
+  const out=arr.slice();let removed=0,tot=0;const room={};
+  for(let h=0;h<24;h++){if(arr[h]!=null&&arr[h]>60){const r=arr[h]*f;out[h]-=r;removed+=r;}}
+  for(let h=6;h<22;h++){if(arr[h]!=null&&arr[h]<45){room[h]=55-arr[h];tot+=room[h];}}
+  if(tot>0){const add=Math.min(removed,tot);for(const h in room)out[h]+=add*room[h]/tot;}
+  return out;
+}
+const avgOpen=(arr,a,b)=>{let s=0,n=0;for(let h=a;h<b;h++){if(arr[h]!=null){s+=arr[h];n++;}}return n?s/n:null;};
+
+/* ===== Trạng thái ===== */
+const S={day:0,hour:NOW.getHours(),sel:'hoian',sort:'asc',filter:'all'};
+let map=null,markers={},c24=null,cWeek=null;
+const $=id=>document.getElementById(id);
+
+function toast(m){const t=$('cwToast');t.textContent=m;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2400);}
+const getNum=k=>{try{return parseInt(localStorage.getItem(k)||'0',10)||0;}catch(e){return 0;}};
+const setJSON=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
+const getJSON=(k,def)=>{try{return JSON.parse(localStorage.getItem(k))||def;}catch(e){return def;}};
+function addPoints(n){try{localStorage.setItem('th_green_points',String(getNum('th_green_points')+n));}catch(e){}$('cwPoints').textContent=getNum('th_green_points');}
+
+/* ===== Điều khiển thời gian ===== */
+function buildDays(){
+  $('cwDays').innerHTML=Array.from({length:7},(_,i)=>{
+    const lb=i===0?'Hôm nay':i===1?'Ngày mai':dlabel(dateOf(i));
+    return `<button class="cw-chip ${S.day===i?'on':''}" data-d="${i}" type="button">${lb}</button>`;}).join('');
+  $('cwDays').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.day=+b.dataset.d;buildDays();refresh();});
+}
+function syncHour(){
+  $('cwHour').value=S.hour;$('cwHourLbl').textContent=pad(S.hour)+':00';
+  const isNow=S.day===0&&S.hour===NOW.getHours();
+  $('cwNowTag').innerHTML=isNow?'<span class="cw-pill" style="background:#0f766e;margin-left:6px">Đang là bây giờ</span>':'';
+}
+$('cwHour').oninput=e=>{S.hour=+e.target.value;syncHour();refresh();};
+$('cwNowBtn').onclick=()=>{S.day=0;S.hour=NOW.getHours();buildDays();syncHour();refresh();};
+
+/* ===== Bản đồ ===== */
+const mkIcon=(d,p,sel)=>{const l=lv(p);
+  return L.divIcon({className:'cm-wrap',iconSize:[42,53],iconAnchor:[21,53],tooltipAnchor:[0,-50],
+   html:`<div class="cm ${sel?'sel':''} ${l.k==='full'?'pulse':''}" style="--c:${l.color}">${p==null?'—':Math.round(p)+'%'}</div>`});};
+function initMap(){
+  const el=$('crowdMap');
+  if(map)return;
+  if(typeof L==='undefined'){el.innerHTML='<div class="map-fail cw-muted">Đang tải bản đồ… Nếu quá lâu, hãy kiểm tra kết nối mạng — danh sách và biểu đồ vẫn hoạt động.</div>';return;}
+  el.innerHTML='';
+  try{
+    map=L.map(el,{scrollWheelZoom:false,zoomControl:true,minZoom:4,maxZoom:17});
+    const carto=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap &copy; CARTO'});
+    const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,referrerPolicy:'origin',attribution:'&copy; OpenStreetMap'});
+    let errs=0,usedOsm=false;
+    carto.on('tileerror',()=>{ if(++errs>=4&&!usedOsm){usedOsm=true;map.removeLayer(carto);osm.addTo(map);errs=0;} });
+    osm.on('tileerror',()=>{ if(++errs===4){const w=document.createElement('div');w.className='map-warn';w.textContent='Không tải được ảnh nền bản đồ (mạng hoặc bị chặn). Các điểm mật độ vẫn hiển thị bình thường.';el.appendChild(w);} });
+    carto.addTo(map);
+    fit();
+    DEST.forEach(d=>{const m=L.marker([d.lat,d.lng],{icon:mkIcon(d,null,false),keyboard:false,riseOnHover:true}).addTo(map);
+      m.bindTooltip(d.name,{direction:'top',offset:[0,0]});m.on('click',()=>select(d.id));markers[d.id]=m;});
+    [100,500,1500].forEach(t=>setTimeout(()=>{if(map){map.invalidateSize();}},t));
+    refresh();
+  }catch(err){
+    map=null;console.error('Map error',err);
+    el.innerHTML='<div class="map-fail cw-muted">Bản đồ gặp lỗi khi khởi tạo: '+String(err.message||err)+'. Hãy tải lại trang.</div>';
+  }
+}
+function fit(){if(map){map.invalidateSize();map.fitBounds([[8.4,102.1],[23.4,109.6]],{padding:[10,10]});}}
+$('cwFit').onclick=fit;
+$('cwLegend').innerHTML=[...LV,CLOSED].map(l=>`<span><i class="cw-dot" style="background:${l.color}"></i>${l.label}</span>`).join('');
+
+
+/* ===== Định vị người dùng + khoảng cách ===== */
+let me=null,meLayer=null;
+const km=(a,b,c,d)=>{const R=6371,r=x=>x*Math.PI/180,dl=r(c-a),dn=r(d-b);const q=Math.sin(dl/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(q));};
+const distTxt=d=>{if(!me)return '';const k=km(me.lat,me.lng,d.lat,d.lng);return ' &nbsp;·&nbsp; <i class="fas fa-route"></i> '+(k<10?k.toFixed(1):Math.round(k))+' km';};
+$('cwLocate').onclick=()=>{
+  if(!navigator.geolocation)return toast('Trình duyệt không hỗ trợ định vị.');
+  toast('Đang xác định vị trí của bạn…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    me={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy};
+    if(map){
+      if(meLayer)meLayer.remove();
+      meLayer=L.layerGroup([
+        L.circle([me.lat,me.lng],{radius:Math.min(me.acc,5000),color:'#2563eb',weight:1,fillOpacity:.1}),
+        L.marker([me.lat,me.lng],{icon:L.divIcon({className:'cm-wrap',html:'<div class="me-dot"></div>',iconSize:[16,16],iconAnchor:[8,8]}),interactive:false})
+      ]).addTo(map);
+    }
+    const near=DEST.map(d=>({d,k:km(me.lat,me.lng,d.lat,d.lng)})).sort((a,b)=>a.k-b.k)[0];
+    if(near.k>800){toast('Bạn đang ở xa các điểm đến trong danh sách (~'+Math.round(near.k)+' km).');}
+    else{S.sel=near.d.id;if(map)map.fitBounds([[me.lat,me.lng],[near.d.lat,near.d.lng]],{padding:[60,60],maxZoom:12});toast('Gần bạn nhất: '+near.d.name+' (~'+Math.round(near.k)+' km). Độ chính xác ±'+Math.round(me.acc)+' m');}
+    refresh();
+  },err=>toast(err.code===1?'Bạn đã từ chối quyền vị trí. Hãy cho phép trong cài đặt trình duyệt.':'Không xác định được vị trí. Hãy bật GPS/Wi-Fi rồi thử lại.'),
+  {enableHighAccuracy:true,timeout:12000,maximumAge:30000});
+};
+
+/* ===== Vẽ lại toàn bộ ===== */
+function current(){const date=dateOf(S.day);return DEST.map(d=>{const arr=dayArr(d,date);return {d,arr,p:arr[S.hour]};});}
+function refresh(){
+  const rows=current();
+  // KPI
+  const cnt={quiet:0,mid:0,busy:0,full:0,closed:0};rows.forEach(r=>cnt[lv(r.p).k]++);
+  $('cwKpi').innerHTML=LV.map(l=>`<div class="col-6 col-lg-3"><div class="cw-card cw-kpi"><i class="cw-dot" style="background:${l.color}"></i><div><b>${cnt[l.k]}</b><div class="cw-muted">điểm ${l.label.toLowerCase()}</div></div></div></div>`).join('');
+  // bản đồ
+  if(map)rows.forEach(r=>{const m=markers[r.d.id];m.setIcon(mkIcon(r.d,r.p,r.d.id===S.sel));m.setZIndexOffset(r.d.id===S.sel?1000:0);});
+  // danh sách
+  const fl=S.filter;
+  let list=rows.filter(r=>fl==='all'||(fl==='quiet'&&r.p!=null&&r.p<35)||(fl==='mid'&&r.p!=null&&r.p>=35&&r.p<65)||(fl==='hot'&&r.p!=null&&r.p>=65));
+  list.sort((a,b)=>{const x=a.p==null?999:a.p,y=b.p==null?999:b.p;return S.sort==='asc'?x-y:y-x;});
+  $('cwSort').innerHTML=S.sort==='asc'?'<i class="fas fa-arrow-down-short-wide"></i> Vắng → đông':'<i class="fas fa-arrow-up-wide-short"></i> Đông → vắng';
+  $('cwFilter').innerHTML=[['all','Tất cả'],['quiet','Vắng'],['mid','Vừa phải'],['hot','Đông & quá tải']].map(([k,t])=>`<button class="cw-chip ${fl===k?'on':''}" data-f="${k}" type="button">${t}</button>`).join('');
+  $('cwFilter').querySelectorAll('button').forEach(b=>b.onclick=()=>{S.filter=b.dataset.f;refresh();});
+  $('cwList').innerHTML=list.length?list.map(r=>{
+    const l=lv(r.p),w=windows(r.d,r.arr).best;
+    return `<div class="cw-item ${r.d.id===S.sel?'sel':''}" data-id="${r.d.id}">
+     <div class="cw-item-top"><span class="cw-item-name">${r.d.name}</span><span class="cw-pill" style="background:${l.color}">${r.p==null?l.label:Math.round(r.p)+'% · '+l.label}</span></div>
+     <div class="cw-bar"><i style="width:${r.p==null?0:Math.min(100,r.p)}%;background:${l.color}"></i></div>
+     <div class="cw-muted"><i class="fas fa-location-dot"></i> ${r.d.prov}${distTxt(r.d)}${w?` &nbsp;·&nbsp; <i class="fas fa-sun" style="color:#16a34a"></i> Giờ vàng ${hh(w.s)}–${hh(w.e)}`:''}</div></div>`;}).join('')
+    :'<div class="cw-muted" style="padding:20px;text-align:center">Không có điểm nào phù hợp bộ lọc ở khung giờ này.</div>';
+  $('cwList').querySelectorAll('.cw-item').forEach(e=>e.onclick=()=>select(e.dataset.id));
+  renderDetail();
+}
+$('cwSort').onclick=()=>{S.sort=S.sort==='asc'?'desc':'asc';refresh();};
+function select(id){S.sel=id;if(map)map.panTo([byId[id].lat,byId[id].lng]);refresh();
+  if(window.innerWidth<992)$('cwDetail').scrollIntoView({behavior:'smooth',block:'start'});}
+
+/* ===== Chi tiết điểm đến ===== */
+function renderDetail(){
+  const d=byId[S.sel],date=dateOf(S.day),arr=dayArr(d,date),p=arr[S.hour],l=lv(p);
+  $('detTitle').textContent=d.name;
+  $('detSub').textContent=d.prov+' ('+d.lat.toFixed(4)+', '+d.lng.toFixed(4)+') · '+WD[date.getDay()]+' '+pad(date.getDate())+'/'+pad(date.getMonth()+1)+' · sức chứa thoải mái ~'+d.cap.toLocaleString('vi-VN')+' khách/giờ';
+  $('detPill').style.background=l.color;
+  $('detPill').textContent=p==null?'Ngoài giờ mở cửa':Math.round(p)+'% · '+l.label+' lúc '+pad(S.hour)+':00';
+  const w=windows(d,arr);
+  if(w.best){const peak=Math.max(...arr.map(v=>v==null?0:v));
+    $('detGold').textContent=hh(w.best.s)+' – '+hh(w.best.e);
+    $('detGoldSub').textContent='~'+Math.round(w.best.avg)+'% · thấp hơn đỉnh '+Math.round(peak-w.best.avg)+' điểm %';
+    $('detAvoid').textContent=hh(w.worst.s)+' – '+hh(w.worst.e);
+    $('detAvoidSub').textContent='~'+Math.round(w.worst.avg)+'% sức chứa';}
+  // ngày đẹp nhất tuần
+  const wk=Array.from({length:7},(_,i)=>({i,date:dateOf(i),v:avgOpen(dayArr(d,dateOf(i)),7,19)}));
+  const bd=wk.reduce((a,b)=>b.v<a.v?b:a);
+  $('detBest').textContent=WD[bd.date.getDay()]+' '+pad(bd.date.getDate())+'/'+pad(bd.date.getMonth()+1);
+  $('detBestSub').textContent='~'+Math.round(bd.v)+'% (7h–19h)';
+  const rc=REAL[d.id].reduce((a,b)=>a+b,0);
+  $('detReal').textContent=rc;
+  $('detRealSub').textContent=rc?'đã cộng vào mô hình hôm nay':'chưa có — hãy thử check-in nhanh';
+  $('btnRoute').href='https://www.google.com/maps/dir/?api=1&destination='+d.lat+','+d.lng;
+  drawChart24(d,arr);drawWeek(d,wk,bd.i);drawShift(d,arr);
+}
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const txtColor=()=>getComputedStyle(document.body).color||'#0f172a';
+const limitPlugin={id:'limit',afterDatasetsDraw(ch){const y=ch.scales.y.getPixelForValue(90),{left,right}=ch.chartArea,c=ch.ctx;
+  c.save();c.setLineDash([5,4]);c.strokeStyle='#dc2626';c.lineWidth=1.2;c.beginPath();c.moveTo(left,y);c.lineTo(right,y);c.stroke();
+  c.setLineDash([]);c.fillStyle='#dc2626';c.font='11px Be Vietnam Pro, sans-serif';c.fillText('Ngưỡng quá tải 90%',left+6,y-5);c.restore();}};
+function drawChart24(d,arr){
+  if(typeof Chart==='undefined')return;
+  const f=+$('shiftRange').value/100,out=shiftArr(d,arr,f),tc=txtColor();
+  const data={labels:arr.map((_,h)=>h+'h'),datasets:[
+   {type:'bar',label:'Dự báo mật độ (%)',data:arr.map(v=>v==null?0:Math.round(v)),
+    backgroundColor:arr.map((v,h)=>lv(v).color+(h===S.hour?'':'bb')),
+    borderColor:tc,borderWidth:arr.map((_,h)=>h===S.hour?3:0),borderRadius:4,order:2},
+   {type:'line',label:'Sau giãn tải',data:out.map(v=>v==null?null:Math.round(v)),borderColor:'#0ea5e9',borderDash:[6,4],borderWidth:2.5,pointRadius:0,tension:.35,hidden:f===0,order:1}]};
+  const opt={responsive:true,maintainAspectRatio:false,
+   onClick:(e,els)=>{if(els.length){S.hour=els[0].index;syncHour();refresh();}},
+   plugins:{legend:{labels:{color:tc,boxWidth:12}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},
+   scales:{x:{ticks:{color:tc},grid:{display:false}},y:{beginAtZero:true,suggestedMax:110,ticks:{color:tc,callback:v=>v+'%'},grid:{color:'rgba(148,163,184,.25)'}}}};
+  if(c24)c24.destroy();
+  c24=new Chart($('chart24'),{data,options:opt,plugins:[limitPlugin]});
+}
+function drawWeek(d,wk,bi){
+  if(typeof Chart==='undefined')return;const tc=txtColor();
+  if(cWeek)cWeek.destroy();
+  cWeek=new Chart($('chartWeek'),{type:'bar',data:{labels:wk.map(x=>dlabel(x.date)),datasets:[{label:'Mật độ TB (%)',data:wk.map(x=>Math.round(x.v)),
+   backgroundColor:wk.map(x=>lv(x.v).color+'cc'),borderColor:wk.map((x,i)=>i===bi?tc:'transparent'),borderWidth:wk.map((x,i)=>i===bi?3:0),borderRadius:6}]},
+   options:{responsive:true,maintainAspectRatio:false,onClick:(e,els)=>{if(els.length){S.day=els[0].index;buildDays();refresh();}},
+    plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc},grid:{display:false}},y:{beginAtZero:true,ticks:{color:tc,callback:v=>v+'%'},grid:{color:'rgba(148,163,184,.25)'}}}}});
+}
+function drawShift(d,arr){
+  const pct=+$('shiftRange').value,out=shiftArr(d,arr,pct/100);$('shiftVal').textContent=pct;
+  const mx=a=>Math.max(...a.map(v=>v==null?0:v)),over=a=>a.filter(v=>v!=null&&v>=90).length;
+  const b=mx(arr),a=mx(out),ob=over(arr),oa=over(out);
+  if(b<60){$('shiftOut').innerHTML='<i class="fas fa-circle-check" style="color:#16a34a"></i> Ngày này điểm đến đang thoải mái ở mọi khung giờ — chưa cần giãn tải. Thử chọn cuối tuần hoặc mùa cao điểm.';return;}
+  $('shiftOut').innerHTML=`<i class="fas fa-arrow-trend-down" style="color:#16a34a"></i> Đỉnh giảm từ <b>${Math.round(b)}%</b> xuống <b>${Math.round(a)}%</b> (−${Math.round(b-a)} điểm %).<br>
+   <i class="fas fa-clock" style="color:#16a34a"></i> Số giờ quá tải: <b>${ob}</b> → <b>${oa}</b> giờ.`;
+}
+$('shiftRange').oninput=()=>{const d=byId[S.sel];const arr=dayArr(d,dateOf(S.day));drawShift(d,arr);drawChart24(d,arr);};
+
+/* ===== Hành động ===== */
+$('btnPlan').onclick=()=>{
+  const d=byId[S.sel],date=dateOf(S.day),w=windows(d,dayArr(d,date)).best;if(!w)return toast('Điểm này không có giờ phù hợp hôm nay.');
+  const plans=getJSON('th_golden_plans',[]),key=d.id+'|'+dkey(date)+'|'+w.s;
+  if(plans.some(x=>x.key===key))return toast('Bạn đã chọn giờ vàng này rồi.');
+  plans.push({key,dest:d.name,date:dkey(date),from:hh(w.s),to:hh(w.e)});setJSON('th_golden_plans',plans);
+  addPoints(10);toast('Đã lưu giờ vàng '+hh(w.s)+'–'+hh(w.e)+' · +10 điểm xanh 🌿');
+};
+$('btnCopy').onclick=()=>{
+  const d=byId[S.sel],date=dateOf(S.day),w=windows(d,dayArr(d,date)).best;if(!w)return;
+  const t=`${d.name} — ${WD[date.getDay()]} ${pad(date.getDate())}/${pad(date.getMonth()+1)}: giờ vàng ${hh(w.s)}–${hh(w.e)} (mật độ ~${Math.round(w.avg)}%). Theo TOUR-HUB.`;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Đã sao chép lịch giờ vàng'),()=>toast(t));
+};
+$('btnCheckin').onclick=()=>{
+  const d=byId[S.sel],now=vnNow();
+  const list=getJSON('th_crowd_checkins',[]);
+  const first=!list.some(x=>x.destId===d.id&&x.day===dkey(now));
+  list.push({destId:d.id,place:d.name,createdAt:new Date().toISOString(),day:dkey(now)});setJSON('th_crowd_checkins',list);
+  if(first)addPoints(5);
+  loadReal();refresh();toast('Đã check-in tại '+d.name+(first?' · +5 điểm xanh 🌿':''));
+};
+
+/* ===== Chủ đề ===== */
+(function(){
+  let t=null;try{t=localStorage.getItem('th_theme')||localStorage.getItem('theme');}catch(e){}
+  if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);
+  const ic=()=>$('cwThemeIcon').className='fas '+(document.documentElement.getAttribute('data-theme')==='dark'?'fa-sun':'fa-moon');
+  ic();
+  $('cwTheme').onclick=()=>{const n=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('th_theme',n);}catch(e){}ic();refresh();};
+})();
+
+/* ===== Khởi động ===== */
+loadReal();buildDays();syncHour();initMap();
+$('cwPoints').textContent=getNum('th_green_points');
+refresh();
+/* ===== Google Maps trực tiếp ===== */
+  var gOn=false,tD=document.getElementById('cwTabD'),tG=document.getElementById('cwTabG'),mp=document.getElementById('crowdMap'),gp=document.getElementById('crowdG'),leg=document.getElementById('cwLegend');
+  function cur(){try{return byId[S.sel]||DEST[0];}catch(e){return DEST[0];}}
+  function updG(){
+    if(!gOn||!window.thGMap)return;var d=cur();
+    thGMap('crowdGMap',{q:d.name+', '+d.prov,lat:d.lat,lng:d.lng,zoom:15,title:d.name});
+  }
+  function tab(on){
+    gOn=on;tD.classList.toggle('on',!on);tG.classList.toggle('on',on);
+    tD.setAttribute('aria-selected',String(!on));tG.setAttribute('aria-selected',String(on));
+    mp.style.display=on?'none':'';gp.hidden=!on;leg.style.display=on?'none':'';
+    if(on)updG();else try{fit();}catch(e){}
+  }
+  tD.onclick=function(){tab(false)};tG.onclick=function(){tab(true)};
+  var _rd=renderDetail;renderDetail=function(){_rd.apply(this,arguments);updG();};
+  /* nút chỉ đường trong khung chi tiết */
+  var host=document.getElementById('btnPlan');
+  if(host&&host.parentNode){
+    var a=document.createElement('a');a.className='cw-btn gh';a.target='_blank';a.rel='noopener';a.id='btnDir';
+    a.innerHTML='<i class="fas fa-diamond-turn-right"></i> Chỉ đường (Google Maps)';host.parentNode.appendChild(a);
+    var oa=function(){var d=cur();a.href=window.thGDir?thGDir({q:d.name+', '+d.prov}):'#';};
+    var rd2=renderDetail;renderDetail=function(){rd2.apply(this,arguments);oa();};oa();
+  }
+window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
+window.addEventListener('load',()=>{if(!map)initMap();else{map.invalidateSize();fit();}});
+});
+</script>
+<style>.cw-tabs{display:flex;gap:6px;margin:0 0 10px;flex-wrap:wrap}.cw-chip.on{background:#15a05a;color:#fff;border-color:#15a05a}#crowdG[hidden]{display:none}.cw-btn{text-decoration:none}</style>
+</body>
+</html>

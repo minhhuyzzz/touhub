@@ -1,0 +1,21 @@
+Đặt video MP4 (H.264 + AAC) vào thư mục này, đúng tên file:
+
+STORY HUB / CHECK-IN HUB
+hoi-an.mp4          Phố cổ Hội An (dùng cho cả Story và Check-in)
+hue.mp4             Cố đô Huế
+ha-long.mp4         Vịnh Hạ Long
+sa-pa.mp4           Sa Pa & Fansipan
+da-lat.mp4          Đà Lạt
+cau-vang-ba-na.mp4  Cầu Vàng Bà Nà
+mu-cang-chai.mp4    Ruộng bậc thang Mù Cang Chải
+son-doong.mp4       Hang Sơn Đoòng
+ho-tuyen-lam.mp4    Hồ Tuyền Lâm Đà Lạt
+
+TRANG dia-danh.html
+dinh-doc-lap.mp4, ben-nha-rong.mp4, nha-tho-duc-ba.mp4, dia-dao-cu-chi.mp4,
+nha-tu-phu-loi.mp4, nha-tu-con-dao.mp4, song-nha-be.mp4, hcm-hero.mp4 (video đầu trang)
+nv-hcm.mp4, nv-nhc.mp4, nv-td.mp4, nv-vts.mp4
+tc-gia-dinh-1859.mp4, tc-chi-hoa-1861.mp4, tc-nam-bo-1945.mp4,
+tc-cu-chi-1966.mp4, tc-mau-than-1968.mp4, tc-ho-chi-minh-1975.mp4
+
+Thiếu file -> trang tự dùng YouTube dự phòng (nếu có) hoặc hiện "Video đang được cập nhật".
